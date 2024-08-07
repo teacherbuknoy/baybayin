@@ -63,8 +63,6 @@ class BaybayinText {
         return arr.map(s => {
           const tl = BaybayinText.transliterate(s)
 
-          console.log(tl)
-
           return tl
         }).join('')
       })
@@ -82,7 +80,7 @@ class BaybayinText {
   }
 
   toString() {
-    return `${this.toOriginalString()}\n\n${this.toBaybayinString()}`
+    return this.toBaybayinString()
   }
 
   /**
@@ -215,9 +213,9 @@ class PreparedText {
   }
 }
 
-function transcribe(text) {
+function toBaybayin(text) {
   return new BaybayinText(text)
-    .toString()
+    .toBaybayinString()
 }
 
-export { transcribe }
+export { toBaybayin }
