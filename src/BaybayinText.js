@@ -8,6 +8,38 @@ const patterns = {
   ng: /\w+ng|ng\w+/gm
 }
 
+const PairType = (function () {
+  let obj = {
+    isP: s => s.match(/^[aeiou]$/gm),
+    isK: s => s.match(/^[^aeiou]$/gm),
+    isPK: s => s.match(/[aeiou]([^aeiou]|ŋ)/gm),
+    isKP: s => s.match(/([^aeiou]|ŋ)[aeiou]/gm)
+  }
+
+  obj = {
+    ...obj,
+    check: s => {
+      if (PairType.isP(s) || PairType.isK(s)) {
+        return 'no-pair'
+      }
+
+      if (s.length > 2) {
+        return 'exceeds-pair'
+      }
+
+      if (PairType.isPK(s)) {
+        return 'PK'
+      }
+
+      if (PairType.isKP(s)) {
+        return 'KP'
+      }
+    }
+  }
+
+  return Object.freeze(obj)
+})()
+
 class BaybayinText {
   #text
 
@@ -26,6 +58,15 @@ class BaybayinText {
       .replaceCharacterNg()
       .toArray()
       .map(s => BaybayinText.syllabify(s))
+      .map(arr => {
+        return arr.map(s => {
+          const tl = BaybayinText.transliterate(s)
+
+          console.log(s, tl)
+
+          return tl
+        })
+      })
 
   }
 
@@ -53,6 +94,46 @@ class BaybayinText {
 
     return units
   }
+
+  static transliterate(text) {
+    const pairType = PairType.check(text)
+
+    if (pairType === 'no-pair') {
+      return characters[text] ?? text
+    } 
+
+    if (pairType === 'KP') {
+      const chars = text.split('')
+
+      return BaybayinText.transliterate(chars[0]) + vowelMarks[chars[1]]
+    }
+
+    if (pairType === 'PK') {
+      const chars = text.split('')
+
+      return chars.map(c => BaybayinText.transliterate(c)).join('')
+    }
+
+    if (pairType === 'exceeds-pair') {
+      const pairs = BaybayinText.splitToPairs(text)
+      return pairs.map(p => BaybayinText.transliterate(p)).join('')
+    }
+
+    return text
+  }
+
+  static splitToPairs(text) {
+    const units = []
+    const pattern = /.{1,2}/g
+    let match
+
+    while ((match = pattern.exec(text)) != null) {
+      units.push(match[0])      
+    }
+
+    return units
+  }
+
 }
 
 class PreparedText {
