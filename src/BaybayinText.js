@@ -42,6 +42,7 @@ const PairType = (function () {
 
 class BaybayinText {
   #text
+  #original
 
   /**
    * Creates an instance of BaybayinText.
@@ -50,7 +51,7 @@ class BaybayinText {
    * @memberof BaybayinText
    */
   constructor(text) {
-    //this.#text = text
+    this.#original = text
 
     this.#text = new PreparedText(text)
       .replaceWordNg()
@@ -61,17 +62,24 @@ class BaybayinText {
       .map(arr => {
         return arr.map(s => {
           const tl = BaybayinText.transliterate(s)
-
-          console.log(s, tl)
-
           return tl
-        })
+        }).join('')
       })
+    
+    console.log(this.toString())
 
   }
 
+  toBaybayinString() {
+    return this.#text.join('')
+  }
+
+  toOriginalString() {
+    return this.#original
+  }
+
   toString() {
-    return this.#text
+    return `${this.toOriginalString()}\n\n${this.toBaybayinString()}`
   }
 
   /**
