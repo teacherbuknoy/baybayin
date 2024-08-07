@@ -13,14 +13,14 @@ const PairType = (function () {
     isP: s => s.match(/^[aeiou]$/gm),
     isK: s => s.match(/^[^aeiou]$/gm),
     isPK: s => s.match(/[aeiou]([^aeiou]|ŋ)/gm),
-    isKP: s => s.match(/([^aeiou]|ŋ)[aeiou]/gm)
-  }
-
-  obj = {
-    ...obj,
+    isKP: s => s.match(/([^aeiou]|ŋ)[aeiou]/gm),
     check: s => {
-      if (PairType.isP(s) || PairType.isK(s)) {
-        return 'no-pair'
+      if (PairType.isP(s)) {
+        return 'P'
+      }
+
+      if (PairType.isK(s)) {
+        return 'K'
       }
 
       if (s.length > 2) {
@@ -62,10 +62,13 @@ class BaybayinText {
       .map(arr => {
         return arr.map(s => {
           const tl = BaybayinText.transliterate(s)
+
+          console.log(tl)
+
           return tl
         }).join('')
       })
-    
+
     console.log(this.toString())
 
   }
@@ -105,29 +108,36 @@ class BaybayinText {
 
   static transliterate(text) {
     const pairType = PairType.check(text)
+    let baybayin = ''
 
-    if (pairType === 'no-pair') {
-      return characters[text] ?? text
-    } 
+    if (pairType === 'P') {
+      baybayin = characters[text] ?? text
+    }
+
+    if (pairType === 'K') {
+      baybayin = characters[text]
+        ? characters[text] + vowelMarks.kill
+        : text
+    }
 
     if (pairType === 'KP') {
       const chars = text.split('')
 
-      return BaybayinText.transliterate(chars[0]) + vowelMarks[chars[1]]
+      baybayin = (characters[chars[0]] ?? text) + vowelMarks[chars[1]]
     }
 
     if (pairType === 'PK') {
       const chars = text.split('')
 
-      return chars.map(c => BaybayinText.transliterate(c)).join('')
+      baybayin = chars.map(c => BaybayinText.transliterate(c).baybayin).join('')
     }
 
     if (pairType === 'exceeds-pair') {
       const pairs = BaybayinText.splitToPairs(text)
-      return pairs.map(p => BaybayinText.transliterate(p)).join('')
+      baybayin = pairs.map(p => BaybayinText.transliterate(p).baybayin).join('')
     }
 
-    return text
+    return baybayin
   }
 
   static splitToPairs(text) {
@@ -136,7 +146,7 @@ class BaybayinText {
     let match
 
     while ((match = pattern.exec(text)) != null) {
-      units.push(match[0])      
+      units.push(match[0])
     }
 
     return units
