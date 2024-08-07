@@ -1,0 +1,24 @@
+{
+  "name": "baybayin-script",
+  "version": "1.0.0",
+  "description": "A JavaScript library for transliterating Filipino text into Baybayin script",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teacherbuknoy/baybayin.git"
+  },
+  "author": "Francis Rubio <hello@francisrub.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/teacherbuknoy/baybayin/issues"
+  },
+  "homepage": "https://github.com/teacherbuknoy/baybayin#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
