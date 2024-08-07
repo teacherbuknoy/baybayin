@@ -18,7 +18,15 @@ class BaybayinText {
    * @memberof BaybayinText
    */
   constructor(text) {
-    this.#text = BaybayinText.syllabify(text)
+    //this.#text = text
+
+    this.#text = new PreparedText(text)
+      .replaceWordNg()
+      .replaceMga()
+      .replaceCharacterNg()
+      .toArray()
+      .map(s => BaybayinText.syllabify(s))
+
   }
 
   toString() {
@@ -34,14 +42,14 @@ class BaybayinText {
    * @memberof BaybayinText
    */
   static syllabify(text) {
-    const units = []
-    const preparedText = new PreparedText(text)
-      .replaceWordNg()
-      .replaceMga()
-      .replaceCharacterNg()
-      .toString()
+    let units = []
 
-    console.log(preparedText)
+    const regex = /(^[aeiou])|(([^aeiou]|ŋ)[aeiou](([^aeiou]|ŋ)(?=([^aeiou]|ŋ)))?)|(([^aeiou]|ŋ)$)|([aeiou]([^aeiou]|ŋ))/dgi
+
+    let match
+    while ((match = regex.exec(text)) != null) {
+      units.push(match[0])
+    }
 
     return units
   }
@@ -56,39 +64,55 @@ class PreparedText {
 
   replaceCharacterNg() {
     const text = this.#text
-    this.#text = text
-      .match(/(\S+ng)|(ng\S+)/gm)
+    const match = text.match(/(\S+ng)|(ng\S+)/gm)
+    this.#text = match ? match
       .map(match => [match, match.replaceAll('ng', 'ŋ')])
       .reduce((total, [match, replacement]) =>
         total.replaceAll(match, replacement), text)
+      : this.#text
 
     return this
   }
 
   replaceWordNg() {
     const text = this.#text
-    this.#text = text
-      .match(/(\s+ng\s+)/gm)
+    const match = text.match(/(\s+ng\s+)/gm)
+    this.#text = match ? match
       .map(match => [match, match.replaceAll(/ng/gm, 'nang')])
       .reduce((total, [match, replacement]) =>
         total.replaceAll(match, replacement), text)
+      : this.#text
 
     return this
   }
 
   replaceMga() {
     const text = this.#text
-    this.#text = text
-      .match(/(\s+mga\s+)/gm)
+    const match = text.match(/(\s+mga\s+)/gm)
+    this.#text = match ? match
       .map(match => [match, match.replaceAll(/mga/gm, 'manga')])
       .reduce((total, [match, replacement]) =>
         total.replaceAll(match, replacement), text)
+      : this.#text
 
     return this
   }
 
   toString() {
     return this.#text
+  }
+
+  toArray() {
+    const units = []
+    const text = this.#text.replace(/[-']/gm, '')
+    const regex = /([-,'.\s])|([A-Za-zŋ]+)/gm
+    let temp
+
+    while ((temp = regex.exec(text)) != null) {
+      units.push(temp[0])
+    }
+
+    return units
   }
 }
 
